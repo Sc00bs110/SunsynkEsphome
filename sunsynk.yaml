@@ -54,9 +54,6 @@ time:
   - platform: homeassistant
     id: homeassistant_time
 
-
-#################################### STATIC SECTION ####################################
-
 #################################### STATIC SECTION ####################################
 
 uart:
