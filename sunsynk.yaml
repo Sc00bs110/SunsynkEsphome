@@ -57,6 +57,8 @@ time:
 
 #################################### STATIC SECTION ####################################
 
+#################################### STATIC SECTION ####################################
+
 uart:
  id: mod_bus
  tx_pin: 17
@@ -73,41 +75,115 @@ modbus_controller:
    address: 0x01
    modbus_id: sunsynk_modbus
    setup_priority: -10
-   update_interval: ${modbus_update_interval}
-   command_throttle: ${query_throttle}
-
+   update_interval: 5000ms
  
 sensor: 
- - platform: modbus_controller          #72 Battery Charge Total
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Charge Total"
-   id: sunsynk_esphome_battery_charge_total
-   register_type: holding
-   address: 72
-   unit_of_measurement: "kWh"
-   accuracy_decimals: 1
-   device_class: energy
-   state_class: total_increasing
-   filters:
-    - lambda: |-
-           x = x / -1;
-           if (x > 32767) return (0 - x + 65535) /10;
-           else return (0 - x) /10;
+- platform: modbus_controller          #72 Battery Charge Total
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Battery Charge Total"
+  id: sunsynk_esphome_battery_charge_total
+  register_type: holding
+  address: 72
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 1
+  device_class: energy
+  state_class: total_increasing
+  filters:
+   - lambda: |-
+          x = x / -1;
+          if (x > 32767) return (0 - x + 65535) /10;
+          else return (0 - x) /10;
 
- - platform: modbus_controller          #74 Battery Discharge Total
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Discharge Total"
-   id: sunsynk_esphome_battery_discharge_total
-   register_type: holding
-   address: 74
-   unit_of_measurement: "kWh"
-   accuracy_decimals: 0
-   device_class: energy
-   state_class: total_increasing
-   filters:
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /10;
-           else return (x) /10;
+- platform: modbus_controller          #74 Battery Discharge Total
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Battery Discharge Total"
+  id: sunsynk_esphome_battery_discharge_total
+  register_type: holding
+  address: 74
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 0
+  device_class: energy
+  state_class: total_increasing
+  filters:
+   - lambda: |-
+          if (x > 32767) return (x - 65535) /10;
+          else return (x) /10;
+
+- platform: modbus_controller          #076 Grid Import Day (Buy)
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Grid Import Day (Buy)"
+  id: sunsynk_esphome_grid_import_day
+  register_type: holding
+  address: 76
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 0
+  device_class: energy
+  state_class: total_increasing
+  filters: # GOOD
+   - lambda: |-
+          if (x > 32767) return (x - 65535) / 10;
+          else return x /10;
+
+ #- platform: modbus_controller          #077 Grid Export Day (Sell)
+ #  modbus_controller_id: sunsynk_esphome
+ #  name: "SS Day_GridSell_Power (Sell)"
+ #  id: sunsynk_esphome_Day_GridSell_Power
+ #  register_type: holding
+ #  address: 77
+ #  unit_of_measurement: "kWh"
+ #  accuracy_decimals: 0
+ #  device_class: energy
+ #  state_class: total_increasing
+ #  filters: # GOOD
+ #   - lambda: |-
+ #          if (x > 32767) return (x - 65535) / 10;
+ #          else return x /10;
+
+- platform: modbus_controller          # 78 Grid Import Total (Buy)
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Grid Import Total (Buy)"
+  id: sunsynk_esphome_grid_import_total_buy
+  register_type: holding
+  address: 78
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 0
+  device_class: energy
+  state_class: total_increasing
+  filters: #GOOD
+   - lambda: |-
+          x = x / -1;
+          if (x > 32767) return (0 - x + 65535) /1;
+          else return (0 - x) /1;
+
+- platform: modbus_controller          # 079 Grid Frequency
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Grid Frequency"
+  id: sunsynk_esphome_grid_frequency
+  register_type: holding
+  address: 79
+  unit_of_measurement: "hz"
+  accuracy_decimals: 2
+  filters: #GOOD
+   - lambda: |-
+          if (x > 32767) return (x - 65535) /100;
+          else return (x) /100;
+  #device_class: none
+  state_class: measurement
+
+# - platform: modbus_controller          # 80 Grid Buy Total 
+#   modbus_controller_id: sunsynk_esphome
+#   name: "SS Total_Grid Buy_Power"
+#   id: sunsynk_esphome_Total_Grid Buy_Power
+#   register_type: holding
+#   address: 80
+#   unit_of_measurement: "kWh"
+#   accuracy_decimals: 2
+#   device_class: energy
+#   state_class: total_increasing
+#   filters:
+#    - lambda: |-
+#           if (x > 32767) return (x - 65535) / 10;
+#           else return x /10;
 
 # - platform: modbus_controller          # 81 Grid Export Total (Sell)
 #   modbus_controller_id: sunsynk_esphome
@@ -124,23 +200,7 @@ sensor:
 #           if (x > 32767) return (x - 65535) / 10;
 #           else return x /10;
 
- - platform: modbus_controller          # 78 Grid Import Total (Buy)
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Grid Import Total (Buy)"
-   id: sunsynk_esphome_grid_import_total_buy
-   register_type: holding
-   address: 78
-   unit_of_measurement: "kWh"
-   accuracy_decimals: 0
-   device_class: energy
-   state_class: total_increasing
-   filters: #GOOD
-    - lambda: |-
-           x = x / -1;
-           if (x > 32767) return (0 - x + 65535) /1;
-           else return (0 - x) /1;
-
- - platform: modbus_controller          # 85 Load Power Total
+-  platform: modbus_controller         # 85 Load Power Total
    modbus_controller_id: sunsynk_esphome
    name: "SS Load Power Total"
    id: sunsynk_esphome_load_power_total
@@ -151,255 +211,11 @@ sensor:
    device_class: energy
    state_class: total_increasing
    filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (0 - x + 65535) /1;
-           else return (0 - x) /1;
-
-
-# - platform: modbus_controller
-#   modbus_controller_id: sunsynk_esphome
-#   name: "SS Total PV Power (kWh)"
-#   id: sunsynk_esphome_total_pv_power_kwh
-#   register_type: holding
-#   address: 96
-#   unit_of_measurement: "kWh"
-#   accuracy_decimals: 2
-#   device_class: energy
-#   state_class: total_increasing
-#   filters:
-#     - multiply: 0.1
-
- - platform: modbus_controller          # 169 Grid Power
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Grid Power"
-   id: sunsynk_esphome_grid_power
-   register_type: holding
-   address: 169
-   unit_of_measurement: "W"
-   accuracy_decimals: 0
-   device_class: power
-   state_class: measurement
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 178 Load Power
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Load Power"
-   id: sunsynk_esphome_load_power
-   register_type: holding
-   address: 178
-   unit_of_measurement: "W"
-   accuracy_decimals: 0
-   device_class: power
-   state_class: measurement
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
-# - platform: modbus_controller
-#   modbus_controller_id: sunsynk_esphome
-#   name: "SS PV1 Power"
-#   id: sunsynk_esphome_pv1_power
-#   register_type: holding
-#   address: 186
-#   unit_of_measurement: "W"
-#   accuracy_decimals: 2
-#   device_class: power
-#   state_class: measurement
-   
-# - platform: modbus_controller
-#   modbus_controller_id: sunsynk_esphome
-#   name: "SS PV2 Power"
-#   id: sunsynk_esphome_pv2_power
-#   register_type: holding
-#   address: 187
-#   unit_of_measurement: "W"
-#   accuracy_decimals: 2
-#   device_class: power
-#   state_class: measurement
-
- - platform: modbus_controller          # 184 Battery SOC
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery SOC"
-   id: sunsynk_esphome_battery_soc
-   register_type: holding
-   address: 184
-   unit_of_measurement: "%"
-   accuracy_decimals: 0
-   device_class: battery
-   state_class: measurement
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 216 Battery Charging Efficiency
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Charging Efficiency"
-   id: sunsynk_esphome_battery_charging_efficiency
-   register_type: holding
-   address: 216
-   unit_of_measurement: "%"
-   accuracy_decimals: 1
-   device_class: battery
-   state_class: measurement
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /10;
-           else return (x) /10;
-
- - platform: modbus_controller          # 013 Firmware Control Board
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Firmware Control Board"
-   id: sunsynk_esphome_firmware_control_board
-   register_type: holding
-   address: 13
-
- - platform: modbus_controller          # 013 Firmware Comms Board
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Firmware Comms Board"
-   id: sunsynk_esphome_firmware_comms_board
-   register_type: holding
-   address: 14
-
- - platform: modbus_controller          # 079 Grid Frequency
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Grid Frequency"
-   id: sunsynk_esphome_grid_frequency
-   register_type: holding
-   address: 79
-   unit_of_measurement: "hz"
-   accuracy_decimals: 2
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /100;
-           else return (x) /100;
-   #device_class: none
-   state_class: measurement
-   
- - platform: modbus_controller          # 154 Grid Inverter Voltage
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Grid Inverter Voltage"
-   id: sunsynk_esphome_grid_inverter_voltage
-   register_type: holding
-   address: 154
-   unit_of_measurement: "V"
-   accuracy_decimals: 1
-   filters: #GOOD
-     - lambda: |-
-           if (x > 32767) return (x - 65535) /10;
-           else return (x) /10;
-   device_class: voltage
-   state_class: measurement
-   
- - platform: modbus_controller         # 150 Grid Voltage
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Grid Voltage"
-   id: sunsynk_esphome_grid_voltage
-   register_type: holding
-   address: 150
-   unit_of_measurement: "V"
-   accuracy_decimals: 1
-   filters: #GOOD
-     - lambda: |-
-           if (x > 32767) return (x - 65535) /10;
-           else return (x) /10;
-   device_class: voltage
-   state_class: measurement
-
- - platform: modbus_controller          # 183 Battery Voltage
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Voltage"
-   id: sunsynk_esphome_battery_voltage
-   register_type: holding
-   address: 183
-   unit_of_measurement: "V"
-   accuracy_decimals: 1
-   filters: #GOOD
-     - lambda: |-
-           if (x > 32767) return (x - 65535) / 100;
-           else return x / 100;
-   device_class: voltage
-   state_class: measurement
-
- - platform: modbus_controller          # 312 Battery Charge Voltage
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Charge Voltage"
-   id: sunsynk_esphome_battery_charge_voltage
-   register_type: holding
-   address: 312
-   unit_of_measurement: "V"
-   accuracy_decimals: 1
-   filters: #GOOD
-     - lambda: |-
-           x = x / -1;
-           if (x > 32767) return (0 - x + 65535) /100;
-           else return (0 - x) /100;
-   device_class: voltage
-   state_class: measurement
-
- - platform: modbus_controller          # 167 Grid Inverter Load
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Grid Inverter Load"
-   id: sunsynk_esphome_grid_inverter_load
-   register_type: holding
-   address: 167
-   unit_of_measurement: "W"
-   accuracy_decimals: 0
-   filters: #GOOD
-     - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-   device_class: power
-   state_class: measurement
-
- - platform: modbus_controller          # 191 Battery Output Current
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Output Current"
-   id: sunsynk_esphome_battery_output_current
-   register_type: holding
-   address: 191
-   unit_of_measurement: "A"
-   accuracy_decimals: 1
-   device_class: current
-   state_class: measurement
-   filters: #GOOD
-    - lambda: |-
-          if (x > 32767) return (0 - x + 65535) /100;
-          else return (0 - x) /100;
-
- - platform: modbus_controller          # 182 Battery Temperature
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Temperature"
-   id: sunsynk_esphome_battery_temperature
-   register_type: holding
-   address: 182
-   unit_of_measurement: "°C"
-   accuracy_decimals: 1
-   device_class: temperature
-   state_class: measurement
-   filters: # GOOD
-    - lambda: |-
-           if (x > 32767) return ((x - 65535)-1000) / 10;
-           else return ((x)-1000) / 10;
-
-# - platform: modbus_controller
-#   modbus_controller_id: sunsynk_esphome
-#   name: "SS Environment Temp"
-#   id: sunsynk_esphome_environment_temperature
-#   register_type: holding
-#   address: 095
-#   unit_of_measurement: "°C"
-#   accuracy_decimals: 0
-#   device_class: temperature
-#   state_class: measurement
-#   filters:
-#     - multiply: 0.1
-
- - platform: modbus_controller          # 090 DC Transformer Temperature
+   - lambda: |-
+          if (x > 32767) return (0 - x + 65535) /1;
+          else return (0 - x) /1;
+ 
+-  platform: modbus_controller          # 090 DC Transformer Temperature
    modbus_controller_id: sunsynk_esphome
    name: "SS DC Transformer Temperature"
    id: sunsynk_esphome_dctransformer_temperature
@@ -414,7 +230,7 @@ sensor:
            if (x > 32767) return ((x - 65535)-1000) / 10;
            else return ((x)-1000) / 10;
 
- - platform: modbus_controller          # 091 Radiator Temperature
+-  platform: modbus_controller          # 091 Radiator Temperature
    modbus_controller_id: sunsynk_esphome
    name: "SS DC Radiator Temperature"
    id: sunsynk_esphome_radiator_temperature
@@ -429,54 +245,189 @@ sensor:
            if (x > 32767) return ((x - 65535)-1000) / 10;
            else return ((x)-1000) / 10;
 
- - platform: modbus_controller          #076 Grid Import Day (Buy)
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Grid Import Day (Buy)"
-   id: sunsynk_esphome_grid_import_day
-   register_type: holding
-   address: 76
-   unit_of_measurement: "kWh"
-   accuracy_decimals: 0
-   device_class: energy
-   state_class: total_increasing
-   filters: # GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) / 10;
-           else return x /10;
+# - platform: modbus_controller            # 92 
+#   modbus_controller_id: sunsynk_esphome
+#   name: "SS Total_Gen_power"
+#   id: sunsynk_esphome_Total_Gen_power
+#   register_type: holding
+#   address: 092
+#   unit_of_measurement: "kWh"
+#   accuracy_decimals: 0
+#   device_class: energy
+#   state_class: measurement
+#   filters:
+#     - multiply: 0.1
 
- - platform: modbus_controller          # 070 Battery Charge Day
+ 
+# - platform: modbus_controller            # 95 Environment Temp
+#   modbus_controller_id: sunsynk_esphome
+#   name: "SS Environment Temp"
+#   id: sunsynk_esphome_environment_temperature
+#   register_type: holding
+#   address: 095
+#   unit_of_measurement: "°C"
+#   accuracy_decimals: 0
+#   device_class: temperature
+#   state_class: measurement
+#   filters:
+#     - multiply: 0.1
+
+# - platform: modbus_controller          # 96 Total PV Power
+#   modbus_controller_id: sunsynk_esphome
+#   name: "SS Total PV Power (kWh)"
+#   id: sunsynk_esphome_total_pv_power_kwh
+#   register_type: holding
+#   address: 96
+#   unit_of_measurement: "kWh"
+#   accuracy_decimals: 2
+#   device_class: energy
+#   state_class: total_increasing
+#   filters:
+#     - multiply: 0.1
+
+-  platform: modbus_controller           # 109 PV1 Voltage
    modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Charge Day"
-   id: sunsynk_esphome_battery_charge_day
+   name: "SS PV1 Voltage"
+   id: sunsynk_esphome_pv1_voltage
    register_type: holding
-   address: 70
-   unit_of_measurement: "kWh"
+   address: 109
+   unit_of_measurement: "V"
+   accuracy_decimals: 2
+   device_class: voltage
+   state_class: measurement
+   filters:
+   - multiply: 0.1
+
+-  platform: modbus_controller           # 110 PV1 Amps
+   modbus_controller_id: sunsynk_esphome
+   name: "SS PV1 Amps"
+   id: sunsynk_esphome_pv1_amps
+   register_type: holding
+   address: 110
+   unit_of_measurement: "A"
+   accuracy_decimals: 2
+   device_class: current
+   state_class: measurement
+   filters:
+   - multiply: 0.1
+
+-  platform: modbus_controller           # 111 PV2 Voltage
+   modbus_controller_id: sunsynk_esphome
+   name: "SS PV2 Voltage"
+   id: sunsynk_esphome_pv2_voltage
+   register_type: holding
+   address: 111
+   unit_of_measurement: "V"
+   accuracy_decimals: 2
+   device_class: voltage
+   state_class: measurement
+   filters:
+   - multiply: 0.1
+   
+
+-  platform: modbus_controller           # 112 PV2 Amps
+   modbus_controller_id: sunsynk_esphome
+   name: "SS PV2 Amps"
+   id: sunsynk_esphome_pv2_amps
+   register_type: holding
+   address: 112
+   unit_of_measurement: "A"
+   accuracy_decimals: 2
+   device_class: current
+   state_class: measurement
+   filters:
+   - multiply: 0.1
+
+# - platform: modbus_controller           # 113 PV3 Voltage
+#   modbus_controller_id: sunsynk_esphome
+#   name: "SS PV3 Voltage"
+#   id: sunsynk_esphome_pv3_voltage
+#   register_type: holding
+#   address: 113
+#   unit_of_measurement: "V"
+#   accuracy_decimals: 2
+#   device_class: voltage
+#   state_class: measurement
+#   filters:
+#   - multiply: 0.1
+   
+
+#- platform: modbus_controller           # 114 PV3 Amps
+#   modbus_controller_id: sunsynk_esphome
+#   name: "SS PV3 Amps"
+#   id: sunsynk_esphome_pv3_amps
+#   register_type: holding
+#   address: 114
+#   unit_of_measurement: "A"
+#   accuracy_decimals: 2
+#   device_class: current
+#   state_class: measurement
+#   filters:
+#   - multiply: 0.1
+
+
+
+-  platform: modbus_controller         # 150 Grid Voltage
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Grid Voltage"
+   id: sunsynk_esphome_grid_voltage
+   register_type: holding
+   address: 150
+   unit_of_measurement: "V"
    accuracy_decimals: 1
-   device_class: energy
-   state_class: total_increasing
+   filters: #GOOD
+     - lambda: |-
+           if (x > 32767) return (x - 65535) /10;
+           else return (x) /10;
+   device_class: voltage
+   state_class: measurement
+   
+-  platform: modbus_controller          # 154 Grid Inverter Voltage
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Grid Inverter Voltage"
+   id: sunsynk_esphome_grid_inverter_voltage
+   register_type: holding
+   address: 154
+   unit_of_measurement: "V"
+   accuracy_decimals: 1
+   filters: #GOOD
+     - lambda: |-
+           if (x > 32767) return (x - 65535) /10;
+           else return (x) /10;
+   device_class: voltage
+   state_class: measurement
+ 
+-  platform: modbus_controller          # 167 Grid Inverter Load
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Grid Inverter Load"
+   id: sunsynk_esphome_grid_inverter_load
+   register_type: holding
+   address: 167
+   unit_of_measurement: "W"
+   accuracy_decimals: 0
+   filters: #GOOD
+     - lambda: |-
+           if (x > 32767) return (x - 65535) /1;
+           else return (x) /1;
+   device_class: power
+   state_class: measurement
+ 
+-  platform: modbus_controller          # 169 Grid Power
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Grid Power"
+   id: sunsynk_esphome_grid_power
+   register_type: holding
+   address: 169
+   unit_of_measurement: "W"
+   accuracy_decimals: 0
+   device_class: power
+   state_class: measurement
    filters: #GOOD
     - lambda: |-
-           x = x / 10;
            if (x > 32767) return (x - 65535) /1;
            else return (x) /1;
 
- - platform: modbus_controller          # 071 Battery Discharge Day
-   modbus_controller_id: sunsynk_esphome
-   name: "SS Battery Discharge Day"
-   id: sunsynk_esphome_battery_discharge_day
-   register_type: holding
-   address: 71
-   unit_of_measurement: "kWh"
-   accuracy_decimals: 1
-   device_class: energy
-   state_class: total_increasing
-   filters: #GOOD
-    - lambda: |-
-           x = x / 1;
-           if (x > 32767) return (x - 65535) /100;
-           else return (x) /100;
-
- - platform: modbus_controller          # 175 Inverter Output Power
+-  platform: modbus_controller          # 175 Inverter Output Power
    modbus_controller_id: sunsynk_esphome
    name: "SS Inverter Output Power"
    id: sunsynk_esphome_inverter_output_power
@@ -491,246 +442,75 @@ sensor:
            else return (0 - x) /-1;
 
 
-################################################ READ SETTINGS ################################################
- - platform: modbus_controller          # 250 Settings Timezone1
+-  platform: modbus_controller          # 178 Load Power
    modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Timezone1"
-   id: sunsynk_esphome_setting_timezone1
+   name: "SS Load Power"
+   id: sunsynk_esphome_load_power
    register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 250
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 251 Settings Timezone2
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Timezone2"
-   id: sunsynk_esphome_setting_timezone2
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 251
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 252 Settings Timezone3
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Timezone3"
-   id: sunsynk_esphome_setting_timezone3
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 252
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 253 Settings Timezone4
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Timezone4"
-   id: sunsynk_esphome_setting_timezone4
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 253
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 254 Settings Timezone5
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Timezone5"
-   id: sunsynk_esphome_setting_timezone5
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 254
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 255 Settings Timezone6
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Timezone6"
-   id: sunsynk_esphome_setting_timezone6
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 255
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 268 Settings SoC Timezone1
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting SoC Timezone1"
-   id: sunsynk_esphome_setting_soc_timezone1
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 268
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 269 Settings SoC Timezone2
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting SoC Timezone2"
-   id: sunsynk_esphome_setting_soc_timezone2
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 269
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 270 Settings SoC Timezone3
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting SoC Timezone3"
-   id: sunsynk_esphome_setting_soc_timezone3
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 270
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 271 Settings SoC Timezone4
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting SoC Timezone4"
-   id: sunsynk_esphome_setting_soc_timezone4
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 271
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 272 Settings SoC Timezone5
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting SoC Timezone5"
-   id: sunsynk_esphome_setting_soc_timezone5
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 272
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 273 Settings SoC Timezone6
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting SoC Timezone6"
-   id: sunsynk_esphome_setting_soc_timezone6
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 273
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 256 Settings Sell Mode Timezone1
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Sell Mode Timezone1"
-   id: sunsynk_esphome_setting_sellmode_timezone1
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 256
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 257 Settings Sell Mode Timezone2
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Sell Mode Timezone2"
-   id: sunsynk_esphome_setting_sellmode_timezone2
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 257
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 258 Settings Sell Mode Timezone3
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Sell Mode Timezone3"
-   id: sunsynk_esphome_setting_sellmode_timezone3
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 258
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 259 Settings Sell Mode Timezone4
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Sell Mode Timezone4"
-   id: sunsynk_esphome_setting_sellmode_timezone4
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 259
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 260 Settings Sell Mode Timezone5
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Sell Mode Timezone5"
-   id: sunsynk_esphome_setting_sellmode_timezone5
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 260
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 261 Settings Sell Mode Timezone6
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Sell Mode Timezone6"
-   id: sunsynk_esphome_setting_sellmode_timezone6
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 261
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 245 Settings Export Limit
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Export Limit"
-   id: sunsynk_esphome_setting_export_limit
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 245
+   address: 178
    unit_of_measurement: "W"
+   accuracy_decimals: 0
    device_class: power
    state_class: measurement
    filters: #GOOD
     - lambda: |-
            if (x > 32767) return (x - 65535) /1;
            else return (x) /1;
-           
- - platform: modbus_controller          # 217 Settings Battery Shutdown
+
+-  platform: modbus_controller          # 181 Gen Power - I think
    modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Battery Shutdown"
-   id: sunsynk_esphome_setting_battery_shutdown
+   name: "SS Gen Power"
+   id: sunsynk_esphome_gen_power
    register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 217
+   address: 181
+   unit_of_measurement: "W"
+   accuracy_decimals: 0
+   device_class: power
+   state_class: measurement
+   filters: #GOOD
+    - lambda: |-
+           if (x > 32767) return (x - 65535) /1;
+           else return (x) /1; 
+
+  
+-  platform: modbus_controller          # 182 Battery Temperature
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Battery Temperature"
+   id: sunsynk_esphome_battery_temperature
+   register_type: holding
+   address: 182
+   unit_of_measurement: "°C"
+   accuracy_decimals: 1
+   device_class: temperature
+   state_class: measurement
+   filters: # GOOD
+    - lambda: |-
+           if (x > 32767) return ((x - 65535)-1000) / 10;
+           else return ((x)-1000) / 10;
+   
+-  platform: modbus_controller          # 183 Battery Voltage
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Battery Voltage"
+   id: sunsynk_esphome_battery_voltage
+   register_type: holding
+   address: 183
+   unit_of_measurement: "V"
+   accuracy_decimals: 1
+   filters: #GOOD
+     - lambda: |-
+           if (x > 32767) return (x - 65535) / 100;
+           else return x / 100;
+   device_class: voltage
+   state_class: measurement
+   
+-  platform: modbus_controller          # 184 Battery SOC
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Battery SOC"
+   id: sunsynk_esphome_battery_soc
+   register_type: holding
+   address: 184
    unit_of_measurement: "%"
+   accuracy_decimals: 0
    device_class: battery
    state_class: measurement
    filters: #GOOD
@@ -738,81 +518,109 @@ sensor:
            if (x > 32767) return (x - 65535) /1;
            else return (x) /1;
 
- - platform: modbus_controller          # 219 Settings Battery Low
+-  platform: modbus_controller         #186 PV1 Power
    modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Battery Low"
-   id: sunsynk_esphome_setting_battery_low
+   name: "SS PV1 Power"
+   id: sunsynk_esphome_pv1_power
    register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 219
+   address: 186
+   unit_of_measurement: "W"
+   accuracy_decimals: 2
+   device_class: power
+   state_class: measurement
+
+  
+-  platform: modbus_controller         #187 PV2 Power
+   modbus_controller_id: sunsynk_esphome
+   name: "SS PV2 Power"
+   id: sunsynk_esphome_pv2_power
+   register_type: holding
+   address: 187
+   unit_of_measurement: "W"
+   accuracy_decimals: 2
+   device_class: power
+   state_class: measurement
+
+ #- platform: modbus_controller         #188 PV3 Power
+ #  modbus_controller_id: sunsynk_esphome
+ #  name: "SS PV3 Power"
+ #  id: sunsynk_esphome_pv3_power
+ #  register_type: holding
+ #  address: 188
+ #  unit_of_measurement: "W"
+ #  accuracy_decimals: 2
+ #  device_class: power
+ #  state_class: measurement
+
+ #- platform: modbus_controller         #189 PV4 Power
+ #  modbus_controller_id: sunsynk_esphome
+ #  name: "SS PV4 Power"
+ #  id: sunsynk_esphome_pv4_power
+ #  register_type: holding
+ #  address: 189
+ #  unit_of_measurement: "W"
+ #  accuracy_decimals: 2
+ #  device_class: power
+ #  state_class: measurement
+
+
+-  platform: modbus_controller         #190 Battery Output power
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Battery output power"
+   id: sunsynk_esphome_Battery_output_power
+   register_type: holding
+   address: 190
+   unit_of_measurement: "W"
+   accuracy_decimals: 2
+   device_class: power
+   state_class: measurement
+
+-  platform: modbus_controller          # 191 Battery Output Current
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Battery Output Current"
+   id: sunsynk_esphome_battery_output_current
+   register_type: holding
+   address: 191
+   unit_of_measurement: "A"
+   accuracy_decimals: 1
+   device_class: current
+   state_class: measurement
+   filters: #GOOD
+    - lambda: |-
+          if (x > 32767) return (0 - x + 65535) /100;
+          else return (0 - x) /100;
+
+
+-  platform: modbus_controller          # 216 Battery Charging Efficiency
+   modbus_controller_id: sunsynk_esphome
+   name: "SS Battery Charging Efficiency"
+   id: sunsynk_esphome_battery_charging_efficiency
+   register_type: holding
+   address: 216
    unit_of_measurement: "%"
+   accuracy_decimals: 1
    device_class: battery
    state_class: measurement
    filters: #GOOD
     - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
+           if (x > 32767) return (x - 65535) /10;
+           else return (x) /10;
 
- - platform: modbus_controller          # 218 Settings Battery Restart
+-  platform: modbus_controller          # 312 Battery Charge Voltage
    modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Battery Restart"
-   id: sunsynk_esphome_setting_battery_restart
+   name: "SS Battery Charge Voltage"
+   id: sunsynk_esphome_battery_charge_voltage
    register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 218
-   unit_of_measurement: "%"
-   device_class: battery
-   state_class: measurement
+   address: 312
+   unit_of_measurement: "V"
+   accuracy_decimals: 1
    filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 210 Settings Battery Max Charge Current
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Battery Max Charge Current"
-   id: sunsynk_esphome_setting_battery_max_charge_current
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 210
-   device_class: current
+     - lambda: |-
+           x = x / -1;
+           if (x > 32767) return (0 - x + 65535) /100;
+           else return (0 - x) /100;
+   device_class: voltage
    state_class: measurement
-   unit_of_measurement: "A"   
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 211 Settings Battery Max Discharge Current
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Max Discharge Current"
-   id: sunsynk_esphome_setting_battery_max_discharge_current
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 211
-   device_class: current
-   state_class: measurement
-   unit_of_measurement: "A"   
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;
-
- - platform: modbus_controller          # 230 Settings Grid Charge Current
-   modbus_controller_id: sunsynk_esphome
-   name: "SSS Setting Grid Charge Current"
-   id: sunsynk_esphome_setting_grid_charge_current
-   register_type: holding
-   skip_updates: ${settings_skipped_updates}
-   address: 230
-   device_class: current
-   state_class: measurement
-   unit_of_measurement: "A"   
-   filters: #GOOD
-    - lambda: |-
-           if (x > 32767) return (x - 65535) /1;
-           else return (x) /1;           
-
 
 
 ############################################### BINARY SENSORS ###############################################
