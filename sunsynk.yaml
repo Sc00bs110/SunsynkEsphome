@@ -75,6 +75,76 @@ modbus_controller:
    update_interval: 5000ms
  
 sensor: 
+
+- platform: modbus_controller          # 060 DayActive Power Wh
+  modbus_controller_id: sunsynk_esphome
+  name: "SS DayActive Power"
+  id: sunsynk_esphome_day_activepower
+  register_type: holding
+  address: 60
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 1
+  device_class: energy
+  state_class: total_increasing
+  filters: #GOOD
+   - lambda: |-
+          x = x / 10;
+          float MAX_VALUE = 32767;
+          if (x > MAX_VALUE) return (0 - 65535) /1;
+          else return (x) /1;
+
+- platform: modbus_controller          # 061 DayReactive Power Wh
+  modbus_controller_id: sunsynk_esphome
+  name: "SS DayReactive Power"
+  id: sunsynk_esphome_day_reactivepower
+  register_type: holding
+  address: 61
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 1
+  device_class: energy
+  state_class: total_increasing
+  filters: #GOOD
+   - lambda: |-
+          x = x / 10;
+          float MAX_VALUE = 32767;
+          if (x > MAX_VALUE) return (0 - 65535) /1;
+          else return (x) /1;
+
+- platform: modbus_controller          # 070 Battery Charge Day
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Battery Charge Day"
+  id: sunsynk_esphome_battery_charge_day
+  register_type: holding
+  address: 70
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 1
+  device_class: energy
+  state_class: total_increasing
+  filters: #GOOD
+   - lambda: |-
+          x = x / 10;
+          float MAX_VALUE = 32767;
+          if (x > MAX_VALUE) return (0 - 65535) /1;
+          else return (x) /1;
+
+- platform: modbus_controller          # 071 Battery Discharge Day
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Battery Discharge Day"
+  id: sunsynk_esphome_battery_discharge_day
+  register_type: holding
+  address: 71
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 1
+  device_class: energy
+  state_class: total_increasing
+  filters: #GOOD
+   - lambda: |-
+          x = x / 10;
+          float MAX_VALUE = 32767;
+          if (x > MAX_VALUE) return (0 - 65535) /1;
+          else return (x) /1;
+
+
 - platform: modbus_controller          #72 Battery Charge Total
   modbus_controller_id: sunsynk_esphome
   name: "SS Battery Charge Total"
@@ -281,6 +351,23 @@ sensor:
 #   state_class: total_increasing
 #   filters:
 #     - multiply: 0.1
+
+- platform: modbus_controller          #108 Solar PV Day (Production)
+  modbus_controller_id: sunsynk_esphome
+  name: "SS Solar PV Day"
+  id: sunsynk_esphome_Solar_PV_day
+  register_type: holding
+  address: 108
+  unit_of_measurement: "kWh"
+  accuracy_decimals: 0
+  device_class: energy
+  state_class: total_increasing
+  filters: # GOOD
+   - lambda: |-
+          x = x / 1;
+          float MAX_VALUE = 32767;
+          if (x > MAX_VALUE) return (0 - 65535) / 10;
+          else return x /10;
 
 -  platform: modbus_controller           # 109 PV1 Voltage
    modbus_controller_id: sunsynk_esphome
